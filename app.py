@@ -1,0 +1,99 @@
+from chalice import Chalice
+import json
+import random
+import datetime
+from urllib2 import Request, urlopen
+from bs4 import BeautifulSoup
+from pytz import timezone
+
+app = Chalice(app_name='contest_alarm')
+
+targetUrl = "http://codeforces.com/contests" #Codeforces contest page
+hookUrl = "https://hooks.slack.com/services/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" #RUN Slack hook Url to channel #contest_alarm
+#hookUrl = "https://hooks.slack.com/services/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" #Harry's Private Url
+channelName = "contest_alarm"
+botName = "Codeforces Bot"
+hourDifference = 6 # Korea is UTC + 9 and Codeforces system is UTC + 9
+
+@app.route('/local')
+def local(): #This function is just for chalice local test.
+    returnValue = index(None, None)
+    return returnValue
+
+@app.route('/')
+def index(event, context): #This function is main function that works in AWS Lambda.
+    response = urlopen(targetUrl)
+    parseHtmlInfo(response)
+    return {'ok': 'yes'}
+
+
+def generateAttachPayload(title, text):
+    attachPayload = {}
+    attachPayload["title"] = title
+    attachPayload["text"] = text
+    attachPayload["color"] = "#%06X" % random.randint(0, 0xFFFFFF)
+    return attachPayload
+
+def generateAndSendPayload(titleText, attachments):
+    payload = {}
+    payload["channel"] = channelName
+    payload["username"] = botName
+    payload["text"] = titleText
+    payload["attachments"] = attachments
+    req = Request(hookUrl, json.dumps(payload))
+    urlopen(req)
+
+def parseHtmlInfo(response):
+    bsObj = BeautifulSoup(response.read(), "html.parser")
+    contestInfo = bsObj.findAll("div", {"class": "datatable"})[0]
+
+    allRows = contestInfo.findAll("tr")
+    numRows = len(allRows) - 1
+    # print("len contests: %s" % numRows)
+
+    headRow = allRows[0].findAll("th")
+
+    attachments = []
+    titleText = "*<%s|Codeforces Contests>*\n" % (hookUrl)
+    #currentTime = datetime.datetime.now().strftime("%b/%d/%Y %H:%M")
+    currentTime = datetime.datetime.now(timezone('Asia/Seoul')).strftime("%b/%d/%Y %H:%M")
+    titleText += "Current time: %s" % (currentTime)
+    for contNum in range(numRows):
+        attachText = ""
+        attachTitle = ""
+        dataRow = allRows[contNum + 1].findAll("td")
+        for i in range(len(headRow)):
+            headText = headRow[i].text.strip()
+            dataText = dataRow[i].text.strip()
+            if (len(headText) == 0):
+                if (len(dataText) == 0):  # Check exception case
+                    continue
+                else:  # Attributes with no headTexts
+                    newDataList = []
+                    dataList = dataText.split(" ")
+                    for i in range(len(dataList)):
+                        if (len(dataList[i]) != 0):
+                            newDataList.append(dataList[i])
+                    newDataText = " ".join(newDataList)
+                    # print("%s\n" % (newDataText))
+                    attachText += "%s\n" % (newDataText)
+            else:
+                if (len(dataText) == 0):
+                    dataText = "Unknown"
+                # print("%s :\t %s\n" % (headText, dataText))
+                if (headText == "Name"):  # Contest name
+                    attachTitle += "%s : %s\n" % (headText, dataText)
+                elif (headText == "Start"):  # Contest start time
+                    startTime = datetime.datetime.strptime(dataText, "%b/%d/%Y %H:%M")
+                    startTime += datetime.timedelta(hours=hourDifference)
+                    adjustedDate = startTime.strftime("%b/%d/%Y %H:%M")
+                    attachText += "%s : %s\n" % (headText, adjustedDate)
+                elif (headText == "Writers"):
+                    continue
+                else:  # Other attributes
+                    attachText += "%s : %s\n" % (headText, dataText)
+        attachPayload = generateAttachPayload(attachTitle, attachText)
+        attachments.append(attachPayload)
+
+    generateAndSendPayload(titleText, attachments)
+
