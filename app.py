@@ -10,7 +10,6 @@ app = Chalice(app_name='contest_alarm')
 
 targetUrl = "http://codeforces.com/contests" #Codeforces contest page
 hookUrl = "https://hooks.slack.com/services/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" #RUN Slack hook Url to channel #contest_alarm
-#hookUrl = "https://hooks.slack.com/services/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" #Harry's Private Url
 channelName = "contest_alarm"
 botName = "Codeforces Bot"
 hourDifference = 6 # Korea is UTC + 9 and Codeforces system is UTC + 9
@@ -49,13 +48,11 @@ def parseHtmlInfo(response):
 
     allRows = contestInfo.findAll("tr")
     numRows = len(allRows) - 1
-    # print("len contests: %s" % numRows)
 
     headRow = allRows[0].findAll("th")
 
     attachments = []
     titleText = "*<%s|Codeforces Contests>*\n" % (hookUrl)
-    #currentTime = datetime.datetime.now().strftime("%b/%d/%Y %H:%M")
     currentTime = datetime.datetime.now(timezone('Asia/Seoul')).strftime("%b/%d/%Y %H:%M")
     titleText += "Current time: %s" % (currentTime)
     for contNum in range(numRows):
@@ -75,12 +72,10 @@ def parseHtmlInfo(response):
                         if (len(dataList[i]) != 0):
                             newDataList.append(dataList[i])
                     newDataText = " ".join(newDataList)
-                    # print("%s\n" % (newDataText))
                     attachText += "%s\n" % (newDataText)
             else:
                 if (len(dataText) == 0):
                     dataText = "Unknown"
-                # print("%s :\t %s\n" % (headText, dataText))
                 if (headText == "Name"):  # Contest name
                     attachTitle += "%s : %s\n" % (headText, dataText)
                 elif (headText == "Start"):  # Contest start time
