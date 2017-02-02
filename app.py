@@ -13,6 +13,7 @@ hookUrl = "https://hooks.slack.com/services/T0AA5969J/B40170PHU/J5vbB2Tv0stZZadT
 channelName = "contest_alarm"
 botName = "Codeforces Bot"
 hourDifference = 6 # Korea is UTC + 9 and Codeforces system is UTC + 9
+timeFormat = "%Y/%m/%d %I:%M %p"
 
 @app.route('/local')
 def local(): #This function is just for chalice local test.
@@ -52,8 +53,8 @@ def parseHtmlInfo(response):
     headRow = allRows[0].findAll("th")
 
     attachments = []
-    titleText = "*<%s|Codeforces Contests>*\n" % (hookUrl)
-    currentTime = datetime.datetime.now(timezone('Asia/Seoul')).strftime("%b/%d/%Y %H:%M")
+    titleText = "*<%s|Go to Codeforces contests list>*\n" % (targetUrl)
+    currentTime = datetime.datetime.now(timezone('Asia/Seoul')).strftime(timeFormat)
     titleText += "Current time: %s" % (currentTime)
     for contNum in range(numRows):
         attachText = ""
@@ -81,7 +82,7 @@ def parseHtmlInfo(response):
                 elif (headText == "Start"):  # Contest start time
                     startTime = datetime.datetime.strptime(dataText, "%b/%d/%Y %H:%M")
                     startTime += datetime.timedelta(hours=hourDifference)
-                    adjustedDate = startTime.strftime("%b/%d/%Y %H:%M")
+                    adjustedDate = startTime.strftime(timeFormat)
                     attachText += "%s : %s\n" % (headText, adjustedDate)
                 elif (headText == "Writers"):
                     continue
