@@ -9,7 +9,7 @@ Configure hookUrl, channelName in test.py and run the following command in the t
 python test.py
 ```
 
-The alternative way is to run chalice on the local environment.
+The alternative way to test is running chalice on the local environment.
 Install chalice and http with the following link: https://github.com/awslabs/chalice
 
 In MAC, write following commands to the terminal to test if the function works correctly.
@@ -18,9 +18,6 @@ In MAC, write following commands to the terminal to test if the function works c
 chalice local
 http localhost:8000/local 
 ```
-
-or
-
 
 
 If you get {"ok": "yes"}, it means that it works correctly.
