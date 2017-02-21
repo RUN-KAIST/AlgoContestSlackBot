@@ -23,7 +23,7 @@ def local(): #This function is just for chalice local test.
 @app.route('/')
 def index(event, context): #This function is main function that works in AWS Lambda.
     response = urlopen(targetUrl)
-    parseHtmlInfo(response)
+    parseHtmlInfo(response, hookUrl, channelName)
     return {'ok': 'yes'}
 
 
@@ -34,16 +34,16 @@ def generateAttachPayload(title, text):
     attachPayload["color"] = "#%06X" % random.randint(0, 0xFFFFFF)
     return attachPayload
 
-def generateAndSendPayload(titleText, attachments):
+def generateAndSendPayload(titleText, attachments, targetChannelUrl, targetChannelName):
     payload = {}
-    payload["channel"] = channelName
+    payload["channel"] = targetChannelName
     payload["username"] = botName
     payload["text"] = titleText
     payload["attachments"] = attachments
-    req = Request(hookUrl, json.dumps(payload))
+    req = Request(targetChannelUrl, json.dumps(payload))
     urlopen(req)
 
-def parseHtmlInfo(response):
+def parseHtmlInfo(response, targetChannelUrl, targetChannelName):
     bsObj = BeautifulSoup(response.read(), "html.parser")
     contestInfo = bsObj.findAll("div", {"class": "datatable"})[0]
 
@@ -57,6 +57,8 @@ def parseHtmlInfo(response):
     currentTime = datetime.datetime.now(timezone('Asia/Seoul')).strftime(timeFormat)
     titleText += "Current time: %s" % (currentTime)
     for contNum in range(numRows):
+        if (contNum >=3):
+            break
         attachText = ""
         attachTitle = ""
         dataRow = allRows[contNum + 1].findAll("td")
@@ -91,5 +93,5 @@ def parseHtmlInfo(response):
         attachPayload = generateAttachPayload(attachTitle, attachText)
         attachments.append(attachPayload)
 
-    generateAndSendPayload(titleText, attachments)
+    generateAndSendPayload(titleText, attachments, targetChannelUrl, targetChannelName)
 
