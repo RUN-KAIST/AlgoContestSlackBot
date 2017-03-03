@@ -1,9 +1,12 @@
 # AlgoContestSlackBot
 
-![alarm image in slack](docs/alarm_sample1.png)
 
-Notify algorithm contest schedules to slack. (Currently, it notifies Codeforces contest schedule to Slack channel.)
 
+Notify algorithm contest schedules to slack channel.
+(Currently, it notifies Codeforces contest schedule to Slack channel.)
+
+
+## How to run
 This Slack bot runs in AWS Lambda.
 To test the bot, you should configure your own hookUrl, channelName in test.py or app.py
 
@@ -22,5 +25,7 @@ chalice local
 http localhost:8000/local 
 ```
 
-
 If you get {"ok": "yes"}, it means that it works correctly.
+
+##Result
+![alarm image in slack](docs/alarm_sample1.png)
