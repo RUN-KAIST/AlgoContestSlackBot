@@ -1,4 +1,7 @@
 # AlgoContestSlackBot
+
+![alarm image in slack](docs/alarm_sample1.png)
+
 Notify algorithm contest schedules to slack. (Currently, it notifies Codeforces contest schedule to Slack channel.)
 
 This Slack bot runs in AWS Lambda.
