@@ -27,5 +27,5 @@ http localhost:8000/local
 
 If you get {"ok": "yes"}, it means that it works correctly.
 
-##Result
+## Result
 ![alarm image in slack](docs/alarm_sample1.png)
