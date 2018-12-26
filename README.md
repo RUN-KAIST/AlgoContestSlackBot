@@ -7,11 +7,19 @@ Notify algorithm contest schedules to slack channel.
 
 
 ## How to run
-To test the bot, you should configure your own channelName in test.py or app.py
+Using [Python 3.7](https://www.python.org/downloads/release/python-371/) and
+[Pipenv](https://pipenv.readthedocs.io/en/latest/) is highly recommended.
+If you already have them, run the following to install dependencies.
+
+```sh
+$ pipenv install
+```
+
+To test the bot, you should configure your own channelName in test.py or app.py.
 
 Configure channelName in test.py and run the following command in the terminal.
 ```sh
-$ SLACK_HOOK_URL=[YOUR_HOOK_URL] python test.py
+$ SLACK_HOOK_URL=[YOUR_HOOK_URL] pipenv run python test.py
 ```
 Your hook url should be provided by Slack API.
 
