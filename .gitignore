@@ -1,4 +1,5 @@
 *.pyc
 .chalice
 .DS_Store
+.idea/
 
