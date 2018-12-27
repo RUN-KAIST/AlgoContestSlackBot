@@ -16,8 +16,15 @@ timeFormat = "%Y/%m/%d %I:%M %p"
 
 def index(): # This function is main function.
     response = requests.get(targetUrl)
-    parseHtmlInfo(response, hookUrl, channelName)
-    return {'ok': 'yes'}
+    if response.status_code == 200:
+        if not parseHtmlInfo(response, hookUrl, channelName):
+            print('Failed to send via the slack message')
+            return False
+    else:
+        print('Failed to fetch the contest list')
+        return False
+
+    return True
 
 
 def generateAttachPayload(title, text):
@@ -30,22 +37,23 @@ def generateAttachPayload(title, text):
 
 
 def generateAndSendPayload(titleText, attachments, targetChannelUrl, targetChannelName):
-    payload = {}
-    payload["channel"] = targetChannelName
-    payload["username"] = botName
-    payload["text"] = titleText
-    payload["attachments"] = attachments
-    requests.post(targetChannelUrl, data=json.dumps(payload))
+    payload = {
+        'channel': targetChannelName,
+        'username': botName,
+        'text': titleText,
+        'attachments': attachments
+    }
+    return requests.post(targetChannelUrl, data=json.dumps(payload)) == 200
 
 
 def parseHtmlInfo(response, targetChannelUrl, targetChannelName):
     bsObj = BeautifulSoup(response.text, "html.parser")
-    contestInfo = bsObj.findAll("div", {"class": "datatable"})[0]
+    contestInfo = bsObj.find_all("div", {"class": "datatable"})[0]
 
-    allRows = contestInfo.findAll("tr")
+    allRows = contestInfo.find_all("tr")
     numRows = len(allRows) - 1
 
-    headRow = allRows[0].findAll("th")
+    headRow = allRows[0].find_all("th")
 
     attachments = []
     titleText = "*<%s|Go to Codeforces contests list>*\n" % (targetUrl)
@@ -88,5 +96,5 @@ def parseHtmlInfo(response, targetChannelUrl, targetChannelName):
         attachPayload = generateAttachPayload(attachTitle, attachText)
         attachments.append(attachPayload)
 
-    generateAndSendPayload(titleText, attachments, targetChannelUrl, targetChannelName)
+    return generateAndSendPayload(titleText, attachments, targetChannelUrl, targetChannelName)
 
