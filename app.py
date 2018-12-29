@@ -43,7 +43,7 @@ def generateAndSendPayload(titleText, attachments, targetChannelUrl, targetChann
         'text': titleText,
         'attachments': attachments
     }
-    return requests.post(targetChannelUrl, data=json.dumps(payload)) == 200
+    return requests.post(targetChannelUrl, data=json.dumps(payload)).status_code == 200
 
 
 def parseHtmlInfo(response, targetChannelUrl, targetChannelName):
